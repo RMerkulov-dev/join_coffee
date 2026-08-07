@@ -1,26 +1,178 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ---------------------------------------------------------------------------
+   Brew Log — an instrument, not a diary.
+   The palette is the extraction spectrum: under-extracted coffee tastes sour
+   and citric (chartreuse), over-extracted tastes ashy and drying (plum). The
+   balance point between them is the green everything correct is drawn in.
+--------------------------------------------------------------------------- */
+
+@theme {
+  --font-display: var(--font-plex-condensed), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+
+  --color-paper: #f1f2ed;
+  --color-panel: #ffffff;
+  --color-ink: #171a16;
+  --color-muted: #6c7268;
+  --color-line: #d8dbd2;
+
+  --color-under: #93a11f; /* sour / under-extracted */
+  --color-over: #7c5169;  /* bitter / over-extracted */
+  --color-balance: #1f4d3a; /* the target */
+  --color-balance-soft: #e3ece6;
+
+  --radius-card: 14px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+:root {
+  color-scheme: light;
+  --paper: #f1f2ed;
+  --panel: #ffffff;
+  --ink: #171a16;
+  --muted: #6c7268;
+  --line: #d8dbd2;
+  --line-soft: #e7e9e2;
+  --under: #93a11f;
+  --over: #7c5169;
+  --balance: #1f4d3a;
+  --balance-soft: #e3ece6;
+  --on-balance: #f4f7f2;
+  --water: #c9d2cc;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    color-scheme: dark;
+    --paper: #121410;
+    --panel: #1b1e19;
+    --ink: #e8ebe2;
+    --muted: #949b8e;
+    --line: #2f342c;
+    --line-soft: #23271f;
+    --under: #b9c841;
+    --over: #b483a0;
+    --balance: #7ec9a2;
+    --balance-soft: #1f2b25;
+    --on-balance: #10231a;
+    --water: #333a33;
   }
 }
 
+* {
+  border-color: var(--line);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  overscroll-behavior-y: none;
+  /* Room for the fixed tab bar plus the iPhone home indicator. */
+  padding-bottom: calc(72px + env(safe-area-inset-bottom));
+}
+
+/* Inputs at 16px or larger stop iOS Safari from zooming on focus. */
+input,
+select,
+textarea,
+button {
+  font: inherit;
+  font-size: max(16px, 1em);
+}
+
+:focus-visible {
+  outline: 2px solid var(--balance);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* --- component primitives ------------------------------------------------ */
+
+@utility card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+}
+
+@utility eyebrow {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+@utility num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "zero" 1;
+}
+
+/* The field label / input pair used throughout the entry form. */
+@utility field {
+  display: block;
+  width: 100%;
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 11px 12px;
+  color: var(--ink);
+  transition: border-color 0.12s ease;
+}
+
+.field::placeholder {
+  color: var(--muted);
+  opacity: 0.7;
+}
+
+.field:focus {
+  outline: none;
+  border-color: var(--balance);
+  box-shadow: 0 0 0 3px var(--balance-soft);
+}
+
+/* --- print --------------------------------------------------------------- */
+
+@media print {
+  :root {
+    color-scheme: light;
+    --paper: #ffffff;
+    --panel: #ffffff;
+    --ink: #000000;
+    --muted: #444444;
+    --line: #bbbbbb;
+    --line-soft: #dddddd;
+    --water: #dddddd;
+    --balance: #000000;
+  }
+
+  body {
+    padding-bottom: 0;
+    background: #fff;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-break {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
 }
