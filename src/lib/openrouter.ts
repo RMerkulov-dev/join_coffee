@@ -4,6 +4,22 @@ const ENDPOINT = 'https://openrouter.ai/api/v1/chat/completions'
 
 export const MODEL = process.env.OPENROUTER_MODEL || 'anthropic/claude-sonnet-5'
 
+/** Turns an OpenRouter failure into something that names the fix. */
+function describe(status: number, body: string): string {
+  switch (status) {
+    case 401:
+      return `OpenRouter rejected the API key. Check OPENROUTER_API_KEY — a full key is 73 characters and starts with a single "sk-or-v1-". On Vercel, redeploy after changing it: env changes don't reach an existing deployment.`
+    case 402:
+      return 'OpenRouter is out of credit. Top up under Credits on openrouter.ai.'
+    case 404:
+      return `OpenRouter doesn't know the model "${MODEL}". Check OPENROUTER_MODEL against openrouter.ai/models.`
+    case 429:
+      return 'OpenRouter is rate limiting the key. Wait a moment and try again.'
+    default:
+      return `OpenRouter returned ${status}. ${body.slice(0, 300)}`
+  }
+}
+
 function headers() {
   const key = process.env.OPENROUTER_API_KEY
   if (!key) throw new Error('OPENROUTER_API_KEY is not set')
@@ -37,7 +53,7 @@ export async function streamCompletion(
 
   if (!res.ok || !res.body) {
     const detail = await res.text().catch(() => '')
-    throw new Error(`OpenRouter returned ${res.status}. ${detail.slice(0, 400)}`)
+    throw new Error(describe(res.status, detail))
   }
 
   const decoder = new TextDecoder()
@@ -80,7 +96,7 @@ export async function completion(messages: ChatMessage[], maxTokens = 1500): Pro
   })
   if (!res.ok) {
     const detail = await res.text().catch(() => '')
-    throw new Error(`OpenRouter returned ${res.status}. ${detail.slice(0, 400)}`)
+    throw new Error(describe(res.status, detail))
   }
   const json = await res.json()
   return json.choices?.[0]?.message?.content ?? ''
