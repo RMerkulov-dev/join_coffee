@@ -93,6 +93,13 @@ export default async function InsightsPage() {
       <Comparison brews={brews} roast="filter" />
       <Comparison brews={brews} roast="espresso" />
 
+      {brews.length > 0 && !goodVsRest(brews, 'filter') && !goodVsRest(brews, 'espresso') && (
+        <p className="mt-3 px-1 text-[14px]" style={{ color: 'var(--muted)' }}>
+          Comparisons appear once you have at least two brews scored 7 or higher and two scored lower, within the same
+          category. One of each would only show noise.
+        </p>
+      )}
+
       {best.length > 0 && (
         <section className="card mt-3 px-4 py-4">
           <h2 className="eyebrow border-b pb-2.5">Your best of each coffee</h2>

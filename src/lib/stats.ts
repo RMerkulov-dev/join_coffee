@@ -34,14 +34,17 @@ export type Comparison = {
 }
 
 /**
- * What separates the cups worth repeating from the rest. Only shown when both
- * sides have entries, because a one-sided average says nothing.
+ * A single brew on either side is an anecdote, not a pattern — two averages of
+ * one would read as a finding when they are noise. Wait for a second entry.
  */
+const MIN_PER_SIDE = 2
+
+/** What separates the cups worth repeating from the rest. */
 export function goodVsRest(brews: Brew[], roast: RoastType): { good: number; rest: number; rows: Comparison[] } | null {
   const scoped = brews.filter((b) => b.roast_type === roast && b.rating !== null)
   const good = scoped.filter((b) => (b.rating ?? 0) >= 7)
   const rest = scoped.filter((b) => (b.rating ?? 0) < 7)
-  if (good.length === 0 || rest.length === 0) return null
+  if (good.length < MIN_PER_SIDE || rest.length < MIN_PER_SIDE) return null
 
   const pick = (list: Brew[], fn: (b: Brew) => number | null) =>
     avg(list.map(fn).filter((n): n is number => n !== null && !Number.isNaN(n)))
